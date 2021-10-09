@@ -53,7 +53,7 @@ I focused on the crawling part, prioritizing Reusability/Maintainability and the
 I didn't spend time on the configurability and visualization parts, mainly because I found the crawling part more interesting.
 
 
-## Limitations
+## Limitations and Tradeoffs
 
 ### Memory / Scaling
 Several parts of this codebase rely on the assumption that the crawl frontier, the set of visited urls and the collected products will fit in memory. While this could be a fair assumption given the current use case and time constraints, it may need improvements in a production system.
