@@ -1,19 +1,16 @@
 import re
-import csv
-from typing import Collection
-
 from crawler import Crawler
-from oda.product import Product
+from frontier import Frontier, InMemoryDequeFrontier, InMemorySetFrontier
+from oda.oda_product import Product
 from bs4 import BeautifulSoup
 
 
 class OdaCrawler(Crawler):
-    
     VISIT_RE = re.compile(r"^https://oda.com/no/(?:products|categories)/.*", flags=re.IGNORECASE)
-    COLLECT_RE = re.compile(r"^https://oda.com/no/products/.+", flags=re.IGNORECASE)
+    COLLECT_RE = re.compile(r"^https://oda.com/no/products/\d+-.+", flags=re.IGNORECASE)
 
-    def __init__(self, url: str, max: int, collected: list):
-        super().__init__(url, max=max)
+    def __init__(self, url: str, max: int, frontier: Frontier=InMemorySetFrontier(),  visited: set[str]=set(), collected: list[Product]=[]):
+        super().__init__(url, max=max, frontier=frontier, visited=visited)
         self.collected = collected
     
     def should_visit(self, url: str) -> bool:
@@ -58,5 +55,9 @@ class OdaCrawler(Crawler):
         )
 
         self.collected.append(product)
+
+    def print_stats(self):
+        super().print_stats()
+        print(f"collected: {len(self.collected)} products")
     
    
