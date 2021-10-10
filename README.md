@@ -44,10 +44,10 @@ I chose CSV as a simple, versatile format that can be imported directly in sever
 I focused on the crawling part, prioritizing Reusability/Maintainability and then Efficiency.
 
 - I started by implementing a simple casual crawler to figure out the main concepts, like the frontier, the list of visited nodes and the main loop.
-- I then looked at oda.com to make the crawling a bit smarter. I found:
+- I then looked at oda.com to make the crawling a bit smarter, limiting the search space to:
    1. Product pages, the main target
    2. Category pages, useful to discover all products
-- While adding logic to limit the search scope to these pages, I tried to isolate all the Oda-specific logic into functions (e.g. should_visit, should_collect, collect), defining the Crawler's natural extension points.
+- I tried to isolate all the Oda-specific logic into functions (e.g. should_visit, should_collect, collect), defining the Crawler's natural extension points.
 - I added the Product scraping part, using local copies of product pages to speed up the process.
 - After it was working, I focused on improving Reusability, by extracting the Crawler abstract class and chopping down functions into smaller cohesive ones.
 - I let the crawler run for a while longer, seeing the frontier growing exponentially and many visits being spent on non-product pages. I focused on improving efficiency by prioritizing product pages over category pages.
@@ -76,23 +76,26 @@ If we set aside this bottleneck we could improve performance, for example by:
 - replacing blocking code with asynchronous calls (e.g. for http requests)
 
 ### Error Handling
-There is very basic error handling in place. We could add retries for http errors, backoff in case of Rate-limit errors.
+There is only basic error handling in place.
+I added retries with a fixed backoff in case of throttling, but the product parsing part still crashes too easily.
 
-### Testing
-There are no automated tests, but the code should be easily testable. One example is the ability to inject the state in the Crawler class. Another is the isolation of the page fetching logic in a function that could be mocked.
+Example/Fun-fact: https://oda.com/no/products/6250-toro-nellik-malt/ has no categories
 
 ### Static Parsing
-This tool performs static parsing (no js is executed). This trades simplicity and performance for flexibility. In order to parse online stores with client heavy front-ends, we may want to add a custom Parser implementation using something like Selenium or Puppeteer to reproduce a full browser environment.
+This tool performs static parsing (no js is executed). This trades flexibility for simplicity and performance. 
+In order to parse online stores with client heavy front-ends, we may want to add a custom Parser implementation using something like Selenium or Puppeteer to reproduce a full browser environment.
+
+### Testing
+There are no automated tests, but the code should be easily testable. 
+One example is the ability to inject the state in the Crawler class. Another is the isolation of the page fetching logic in a function that could be mocked.
 
 ### Politeness
-The delay between requests is currently hardcoded, as well as an exclusion list on some paths. We could automate scanning Robots.txt and adhering to the policies it describes. On top of that we could tune the request rate based on the avg response latency, or . 
+The delay between requests is currently hardcoded, as well as an exclusion list on some paths. 
+We could automate scanning Robots.txt and adhering to the policies it describes. 
+On top of that we could tune the request rate based on the avg response latency, or increase in case of throttling. 
 
 
 ## Other Ideas
-
-### Save / Resume feature
-The state (frontier/visited/collected trio) could be saved to disk and loaded. This would allow different runs to build on each other's progress.
-I started adding the saving part, but skipped the loading one.
 
 ### Configurability
 A configuration could be stored in a (e.g. json) file and loaded on startup. This could include:
@@ -105,4 +108,10 @@ A configuration could be stored in a (e.g. json) file and loaded on startup. Thi
  Oda-specific:
  - list of regex for should_visit, should_collect
  - output file name
+
+We could also add some/all of these as args.
  
+### Save / Resume feature
+The state (frontier/visited/collected trio) could be saved to disk and loaded. This would allow different runs to build on each other's progress.
+I started adding the saving part, but skipped the loading one.
+
