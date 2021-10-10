@@ -5,8 +5,7 @@ from dataclasses import dataclass
 class Product:
     id: str
     name: str
-    # description: str
-    category_path: str
+    category_path: str  # IDEA: split in levels
     price: str
     currency: str
     brand: str

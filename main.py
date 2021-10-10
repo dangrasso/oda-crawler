@@ -1,39 +1,52 @@
 import csv
 import json
-from datetime import datetime
+import signal
+import sys
 from dataclasses import asdict, fields
-from crawler import Crawler
+from datetime import datetime
+
 from oda.oda_crawler import OdaCrawler
 from oda.oda_product import Product
 
 
-def main():
-    start_time = datetime.now()
-    collected_products: list[Product] = []
-    crawler: Crawler = OdaCrawler("https://oda.com/no/products/", max=5, collected=collected_products)
-    crawler.crawl()
+def save_state(frontier, visited, collected):
+    now = datetime.now()
 
-    crawl_end_time = datetime.now()
-    print(f"DONE crawling in {crawl_end_time - start_time}")
+    with open(f'oda_frontier_{now:%Y%m%d-%H%M}.json', 'w', encoding='UTF8') as file:
+        file.write(json.dumps(list(frontier), indent=2))
+        print(f'Saved frontier: {file.name}')
 
-    print(f"Saving crawling results...")    
+    with open(f'oda_visited_{now:%Y%m%d-%H%M}.json', 'w', encoding='UTF8') as file:
+        file.write(json.dumps(list(visited), indent=2))
+        print(f'Saved visited: {file.name}')
 
-    with open(f'oda_products_{start_time:%Y%m%d-%H%M}.csv', 'w', encoding='UTF8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=[f.name for f in fields(Product)])
+    with open(f'oda_products_{now:%Y%m%d-%H%M}.csv', 'w', encoding='UTF8') as file:
+        writer = csv.DictWriter(file, fieldnames=[field.name for field in fields(Product)])
         writer.writeheader()
-        writer.writerows([asdict(p) for p in collected_products])
-    
-    # IDEA: allow saving and restoring state
-    with open(f'oda_frontier_{start_time:%Y%m%d-%H%M}.json', 'w', encoding='UTF8', newline='') as f:
-        f.write(json.dumps(list(crawler.frontier)))
+        writer.writerows([asdict(product) for product in collected])
+        print(f'Saved collected: {file.name}')
 
-    with open(f'oda_visited_{start_time:%Y%m%d-%H%M}.json', 'w', encoding='UTF8', newline='') as f:
-        f.write(json.dumps(list(crawler.visited)))
 
-    end_time = datetime.now()
-    
-    print(f"DONE in {end_time - crawl_end_time}")
+def main():
+    crawler = OdaCrawler("https://oda.com/no/products/", max_visits=10000)
+    # IDEA: allow loading status
+
+    def on_interrupt(*args):
+        print('\nInterrupted! Saving state before exiting...')
+        save_state(frontier=crawler.frontier, visited=crawler.visited, collected=crawler.collected)
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, on_interrupt)
+
+    start = datetime.now()
+    crawler.crawl()
+    end = datetime.now()
+    print(f"DONE crawling in {(end - start)}")
     crawler.print_stats()
+
+    print(f"Saving crawling results...")
+    save_state(frontier=crawler.frontier, visited=crawler.visited, collected=crawler.collected)
+
 
 if __name__ == "__main__":
     main()
