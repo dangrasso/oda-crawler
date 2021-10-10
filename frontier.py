@@ -7,7 +7,7 @@ from typing import Iterable
 class Frontier(ABC):
     """
     This class abstracts away the idea of a frontier of urls for the crawler.
-    It should be possible to add new urls to the frontier, either at low or high priority, as well as retrieve the next and know the frontier size.
+    It should be possible to add new urls to the frontier, either at low or high priority.
     """
 
     @abstractmethod

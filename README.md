@@ -1,8 +1,7 @@
-# Product Crawler
+# Oda Product Crawler
 
 This tool crawls the product catalogue of the online grocery store oda.com. 
 The codebase defines abstractions that can be used to build custom adapters for different crawling use cases.
-
 
 ## Prerequisites
 
@@ -20,18 +19,17 @@ This project has 2 dependencies:
 
 
 ## How to Run
-
 ```
 python main.py
 ```
 
 ## How to Test
-
 ```
 python -m unittest discover tests
 ```
 
-## Choices
+
+## Main Choices
 
 ### Language
 I chose Python as an occasion to learn more / refresh what I know. I mostly used python for scripting or small projects. 
@@ -71,35 +69,46 @@ I didn't spend time on the configurability and visualization parts, mainly becau
 Several parts of this codebase rely on the assumption that the crawl frontier, the set of visited urls and the collected products will fit in memory. While this could be a fair assumption given the current use case and time constraints, it may need improvements in a production system.
 
 For example:
-- the crawl frontier could be kept elsewhere. A messaging queue could fit this use case very well. We could use a priority queue or simulate the dual priority by having 2 queues. One caveat with the queue approach is that it can limit our ability to check if a new url is already in the frontier. If the queue size becomes a problem we could mitigate by adding a lookup in front of it.
-- the visited urls require random access, because we constantly check them to avoid cycles and waste. An in-memory cache would shine there, paired with some clever hashing of the keys. Redis for example. For a long-running crawler we could even add a ttl.
+- the crawl frontier could be kept elsewhere. A messaging queue could fit this use case very well. 
+  We could use a priority queue or simulate the dual priority by having 2 queues. 
+  One caveat with the queue approach is that it can limit our ability to check for duplicates. 
+  If this is the case and the queue size becomes a problem we could mitigate by adding a lookup in front of it.
+- the visited urls require random access, because we constantly check them to avoid cycles and waste. 
+  An in-memory cache would shine there, paired with some clever hashing of the keys. Redis for example.
+  For a long-running crawler we could even add a ttl.
 - the collected products could be stored in a db or flushed to disk at regular intervals.
 
 ### Performance
-The bottleneck here is the added delay between http requests. Regardless of how efficient each crawler is, or how many concurrent crawlers we throw at the problem, in order to avoid DDOS-ing the site we're going to stay within a *shared* budget of req/s. Not finding anything in https://oda.com/robots.txt I kept it around 1 req/s. 
+The bottleneck here is the added delay between http requests.
+Regardless of how efficient each crawler is, or how many concurrent crawlers we throw at the problem, 
+in order to avoid DDOS-ing the site we're going to stay within a *shared* budget of req/s. 
 
-If we set aside this bottleneck we could improve performance, for example by:
-- spawning concurrent crawlers sharing the same frontier/visited-set/products-store, or partitioning the search space
-- replacing blocking code with asynchronous calls (e.g. for http requests)
+Not finding anything in https://oda.com/robots.txt I kept the req rate around 1 req/s.
+
+If we set aside this bottleneck we could improve performance, fpr example by:
+- spawning concurrent crawlers sharing the same frontier/visited-set/products-store
+- replacing blocking code with async/await
 
 ### Error Handling
 There is only basic error handling in place.
-I added retries with a fixed backoff in case of throttling, but the product parsing part still crashes too easily.
+I added retries with a fixed backoff in case of throttling, but the product parsing part is still quite fragile.
 
 Example/Fun-fact: https://oda.com/no/products/6250-toro-nellik-malt/ has no categories
+
+On top of that the whole parsing results are gone in case of a crash, which is not great.
 
 ### Static Parsing
 This tool performs static parsing (no js is executed). This trades flexibility for simplicity and performance. 
 In order to parse online stores with client heavy front-ends, we may want to add a custom Parser implementation using something like Selenium or Puppeteer to reproduce a full browser environment.
 
 ### Testing
-There are only a few automated tests, but the code should be easily testable. 
+There are only a few unit tests, but the code should be easily testable. 
 One example is the ability to inject the state in the Crawler class. Another is the isolation of the page fetching logic in a function that could be mocked.
 
 ### Politeness
 The delay between requests is currently hardcoded, as well as an exclusion list on some paths. 
 We could automate scanning Robots.txt and adhering to the policies it describes. 
-On top of that we could tune the request rate based on the avg response latency, or increase in case of throttling. 
+On top of that we could tune the request rate based on the avg response latency, or decrease in case of throttling. 
 
 
 ## Other Ideas
@@ -119,6 +128,6 @@ A configuration could be stored in a (e.g. json) file and loaded on startup. Thi
 We could also add some/all of these as args.
  
 ### Save / Resume feature
-The state (frontier/visited/collected trio) could be saved to disk and loaded. This would allow different runs to build on each other's progress.
-I started adding the saving part, but skipped the loading one.
+The state (frontier/visited/collected trio) could be saved to disk and loaded. This would allow a user to pause and resume progress.
+I implemented the saving part for debugging reasons, but skipped the loading.
 
