@@ -51,13 +51,24 @@ class OdaCrawler(Crawler):
         if html is None:
             return
 
+        last_category_link = html.select_one(f".breadcrumb :last-of-type > a[itemprop=url]")
+
+        category_levels = []
+        if last_category_link is not None:
+            category_path = last_category_link.attrs.get("href")
+            category_levels = category_path.split("/")[1:-1] if category_path is not None else []
+            if "categories" in category_levels:
+                category_levels.remove("categories")
+
         product = Product(
-            id=tag.attrs.get('data-product') if (tag := html.select_one(f"[data-product]")) else None,
+            id=tag.attrs.get("data-product") if (tag := html.select_one(f"[data-product]")) else None,
             name=tag.get_text(" ", strip=True) if (tag := html.select_one(f"h1 [itemprop=name]")) else None,
-            category_path=tag.attrs.get('href') if (tag := html.select_one(f".breadcrumb :last-of-type > a[itemprop=url]")) else None,
-            price=tag.attrs.get('content') if (tag := html.select_one(f"[itemprop=price]")) else None,
-            currency=tag.attrs.get('content') if (tag := html.select_one(f"[itemprop=priceCurrency]")) else None,
-            brand=tag.get_text(" ", strip=True) if (tag := html.select_one(f"[itemprop=brand]")) else None
+            brand=tag.get_text(" ", strip=True) if (tag := html.select_one(f"[itemprop=brand]")) else None,
+            price=tag.attrs.get("content") if (tag := html.select_one(f"[itemprop=price]")) else None,
+            category_0=category_levels[0] if len(category_levels) > 0 else None,
+            category_1=category_levels[1] if len(category_levels) > 1 else None,
+            category_2=category_levels[2] if len(category_levels) > 2 else None,
+            category_3=category_levels[3] if len(category_levels) > 3 else None
         )
 
         self.products.append(product)

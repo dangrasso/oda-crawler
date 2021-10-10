@@ -1,11 +1,14 @@
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
 class Product:
     id: str
     name: str
-    category_path: str  # IDEA: split in levels
+    brand: Optional[str]
     price: str
-    currency: str
-    brand: str
+    category_0: Optional[str]
+    category_1: Optional[str]
+    category_2: Optional[str]
+    category_3: Optional[str]
