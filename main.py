@@ -9,7 +9,7 @@ from oda.oda_crawler import OdaCrawler
 from oda.oda_product import Product
 
 
-def save_state(frontier, visited, collected):
+def save_state(frontier, visited, products):
     now = datetime.now()
 
     with open(f'oda_frontier_{now:%Y%m%d-%H%M}.json', 'w', encoding='UTF8') as file:
@@ -23,7 +23,7 @@ def save_state(frontier, visited, collected):
     with open(f'oda_products_{now:%Y%m%d-%H%M}.csv', 'w', encoding='UTF8') as file:
         writer = csv.DictWriter(file, fieldnames=[field.name for field in fields(Product)])
         writer.writeheader()
-        writer.writerows([asdict(product) for product in collected])
+        writer.writerows([asdict(product) for product in products])
         print(f'Saved collected: {file.name}')
 
 
@@ -33,7 +33,7 @@ def main():
 
     def on_interrupt(*args):
         print('\nInterrupted! Saving state before exiting...')
-        save_state(frontier=crawler.frontier, visited=crawler.visited, collected=crawler.collected)
+        save_state(frontier=crawler.frontier, visited=crawler.visited, products=crawler.products)
         sys.exit(0)
 
     signal.signal(signal.SIGINT, on_interrupt)
@@ -45,7 +45,7 @@ def main():
     crawler.print_stats()
 
     print(f"Saving crawling results...")
-    save_state(frontier=crawler.frontier, visited=crawler.visited, collected=crawler.collected)
+    save_state(frontier=crawler.frontier, visited=crawler.visited, products=crawler.products)
 
 
 if __name__ == "__main__":

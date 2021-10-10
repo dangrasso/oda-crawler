@@ -13,11 +13,11 @@ class OdaCrawler(Crawler):
     COLLECT_RE = re.compile(r"^https://oda.com/no/products/\d+-.+", flags=re.IGNORECASE)
 
     def __init__(self, url: str, max_visits: int, frontier: Frontier = None, visited: set[str] = None,
-                 collected: list[Product] = None):
+                 products: list[Product] = None):
         super().__init__(url, max_visits, frontier, visited)
-        if collected is None:
-            collected = []
-        self.collected = collected
+        if products is None:
+            products = []
+        self.products = products
 
     def should_visit(self, url: str) -> bool:
         if not self.VISIT_RE.match(url):
@@ -60,8 +60,8 @@ class OdaCrawler(Crawler):
             brand=tag.get_text(" ", strip=True) if (tag := html.select_one(f"[itemprop=brand]")) else None
         )
 
-        self.collected.append(product)
+        self.products.append(product)
 
     def print_stats(self):
         super().print_stats()
-        print(f"collected: {len(self.collected)} products")
+        print(f"collected: {len(self.products)} products")
