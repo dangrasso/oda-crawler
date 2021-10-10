@@ -18,15 +18,22 @@ This project has 2 dependencies:
 - `beautifulsoup4` as html parser
 
 
+## How to Test
+```
+python -m unittest discover tests
+```
+
 ## How to Run
 ```
 python main.py
 ```
 
-## How to Test
-```
-python -m unittest discover tests
-```
+There is a hardcoded max number of page visits, but it's possible to stop the parsing at any moment with `CTRL+C`.
+
+Before stopping, the program will save the current state in 3 files:
+- `oda_frontier_<DATETIME>.json`, for debugging
+- `oda_visited_<DATETIME>.json`, for debugging
+- `oda_products_<DATETIME>.csv` <-- this is the main application output
 
 
 ## Main Choices
@@ -49,10 +56,10 @@ I chose CSV as a simple, versatile format that can be imported directly in sever
 I focused on the crawling part, prioritizing Extensibility, Maintainability and then Efficiency.
 I didn't spend time on the configurability and visualization parts, mainly because I found the crawling part more interesting.
 
-### Step 0: learn
+#### Step 0: learn
 I started by implementing a simple casual crawler to figure out the main concepts, like the frontier, the list of visited nodes and the main loop.
 
-### Step 1: customize
+#### Step 1: customize
 I then looked at oda.com to make the crawling a bit smarter, limiting the search space to:
    - **Product pages**, the main target
    - **Category pages**, useful to discover all products
@@ -63,13 +70,13 @@ defining the Crawler's "natural" extension points.
 I added the Product collection/scraping part, using local copies of product pages to speed up the process.
 I also added a few 'Politeness' features, based on the robots.txt file.
 
-### Step 2: generalize
+#### Step 2: generalize
 After it was working, I focused on improving Extensibility, by extracting the Crawler abstract class and chopping down functions into smaller cohesive ones.
 
 When doing this I considered, for example, the use-case of finding broken links.
 This helped me remove some assumptions regarding status codes that I initially baked into the Crawler.
 
-### Step 3: optimize
+#### Step 3: optimize
 I let the crawler run for a while longer and noticed that:
    1. many visits were spent on category pages
    2. the frontier was growing with many duplicates
@@ -79,12 +86,12 @@ I addressed (1) by prioritizing product pages over category pages, using a `dequ
 When attacking (2) I decided to abstract away the concept of Frontier.
 This allowed me to test a few implementations (see [frontier.py](./crawler/frontier.py)), and choose one based on 2 sets.
 
-### Step 4: improve extensibility
+#### Step 4: improve extensibility
 Thinking about how to make the crawling distributed, I made the state (frontier,visited,products) **injectable**.
 This means that multiple crawlers could cooperate on the same frontier, for example.
 Generalizing the Frontier in the previous step was also partly due to this.
 
-### Final touches
+#### Final touches
 I added a few features before wrapping up, like:
 - ability to stop the program and get dumps of frontier/visited/products.
 - retry, backoff on throttling errors
@@ -127,7 +134,7 @@ On top of that the whole parsing results are gone in case of a crash, which is n
 
 ### Static Parsing
 This tool performs static parsing (no js is executed). This trades flexibility for simplicity and performance. 
-In order to parse online stores with client heavy front-ends, we may want to add a custom Parser implementation using something like Selenium or Puppeteer to reproduce a full browser environment.
+In order to parse online stores with client heavy front-ends, we may want to add a custom `fetch_content` implementation using something like Selenium or Puppeteer to reproduce a full browser environment.
 
 ### Testing
 There are only a few unit tests, but the code should be easily testable. 
