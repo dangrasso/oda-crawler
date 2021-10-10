@@ -46,21 +46,49 @@ I chose CSV as a simple, versatile format that can be imported directly in sever
 
 ## Approach
 
-I focused on the crawling part, prioritizing Reusability/Maintainability and then Efficiency.
-
-- I started by implementing a simple casual crawler to figure out the main concepts, like the frontier, the list of visited nodes and the main loop.
-- I then looked at oda.com to make the crawling a bit smarter, limiting the search space to:
-   1. Product pages, the main target
-   2. Category pages, useful to discover all products
-- I tried to isolate all the Oda-specific logic into functions (e.g. should_visit, should_collect, collect), defining the Crawler's natural extension points.
-- I added the Product scraping part, using local copies of product pages to speed up the process.
-- After it was working, I focused on improving Reusability, by extracting the Crawler abstract class and chopping down functions into smaller cohesive ones.
-- I let the crawler run for a while longer, seeing the frontier growing exponentially and many visits being spent on non-product pages. I focused on improving efficiency by prioritizing product pages over category pages.
-- While at it I extracted the Frontier into its own abstraction and made thw whole "state" injectable, in order to improve Extensibility and opening up for a more distributed crawling.
-- I experimented with a couple of Frontier implementations to avoid duplicates in the frontier (see frontier.py)
-- Added ability to stop the program and get dumps of frontier/visited/products.
-
+I focused on the crawling part, prioritizing Extensibility, Maintainability and then Efficiency.
 I didn't spend time on the configurability and visualization parts, mainly because I found the crawling part more interesting.
+
+### Step 0: learn
+I started by implementing a simple casual crawler to figure out the main concepts, like the frontier, the list of visited nodes and the main loop.
+
+### Step 1: customize
+I then looked at oda.com to make the crawling a bit smarter, limiting the search space to:
+   - **Product pages**, the main target
+   - **Category pages**, useful to discover all products
+
+I tried to isolate all the Oda-specific logic into functions (e.g. should_visit, should_collect, collect), 
+defining the Crawler's "natural" extension points.
+
+I added the Product collection/scraping part, using local copies of product pages to speed up the process.
+I also added a few 'Politeness' features, based on the robots.txt file.
+
+### Step 2: generalize
+After it was working, I focused on improving Extensibility, by extracting the Crawler abstract class and chopping down functions into smaller cohesive ones.
+
+When doing this I considered, for example, the use-case of finding broken links.
+This helped me remove some assumptions regarding status codes that I initially baked into the Crawler.
+
+### Step 3: optimize
+I let the crawler run for a while longer and noticed that:
+   1. many visits were spent on category pages
+   2. the frontier was growing with many duplicates
+
+I addressed (1) by prioritizing product pages over category pages, using a `deque` for the frontier.
+
+When attacking (2) I decided to abstract away the concept of Frontier.
+This allowed me to test a few implementations (see [frontier.py](./crawler/frontier.py)), and choose one based on 2 sets.
+
+### Step 4: improve extensibility
+Thinking about how to make the crawling distributed, I made the state (frontier,visited,products) **injectable**.
+This means that multiple crawlers could cooperate on the same frontier, for example.
+Generalizing the Frontier in the previous step was also partly due to this.
+
+### Final touches
+I added a few features before wrapping up, like:
+- ability to stop the program and get dumps of frontier/visited/products.
+- retry, backoff on throttling errors
+- breakdown of category path into levels and a few tests
 
 
 ## Limitations and Tradeoffs
@@ -124,8 +152,6 @@ A configuration could be stored in a (e.g. json) file and loaded on startup. Thi
  Oda-specific:
  - list of regex for should_visit, should_collect
  - output file name
-
-We could also add some/all of these as args.
  
 ### Save / Resume feature
 The state (frontier/visited/collected trio) could be saved to disk and loaded. This would allow a user to pause and resume progress.

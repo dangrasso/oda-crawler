@@ -6,8 +6,8 @@ from typing import Optional
 import requests
 from bs4 import BeautifulSoup
 
-from frontier import Frontier, InMemorySetFrontier
-from util import get_base_url, to_absolute_url
+from crawler.frontier import Frontier, InMemorySetFrontier
+from crawler.util import get_base_url, to_absolute_url
 
 
 class Crawler(ABC):

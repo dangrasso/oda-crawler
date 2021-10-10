@@ -3,9 +3,9 @@ from typing import Optional
 
 from bs4 import BeautifulSoup
 
-from crawler import Crawler
-from frontier import Frontier
-from oda.oda_product import Product
+from crawler.crawler import Crawler
+from crawler.frontier import Frontier
+from crawler.oda.oda_product import Product
 
 
 class OdaCrawler(Crawler):
@@ -51,8 +51,11 @@ class OdaCrawler(Crawler):
         if html is None:
             return
 
-        last_category_link = html.select_one(f".breadcrumb :last-of-type > a[itemprop=url]")
+        product_id = tag.attrs.get("data-product") if (tag := html.select_one(f"[data-product]")) else None
+        if product_id is None:
+            return
 
+        last_category_link = html.select_one(f".breadcrumb :last-of-type > a[itemprop=url][href]")
         category_levels = []
         if last_category_link is not None:
             category_path = last_category_link.attrs.get("href")
@@ -61,7 +64,7 @@ class OdaCrawler(Crawler):
                 category_levels.remove("categories")
 
         product = Product(
-            id=tag.attrs.get("data-product") if (tag := html.select_one(f"[data-product]")) else None,
+            id=product_id,
             name=tag.get_text(" ", strip=True) if (tag := html.select_one(f"h1 [itemprop=name]")) else None,
             brand=tag.get_text(" ", strip=True) if (tag := html.select_one(f"[itemprop=brand]")) else None,
             price=tag.attrs.get("content") if (tag := html.select_one(f"[itemprop=price]")) else None,
@@ -70,7 +73,6 @@ class OdaCrawler(Crawler):
             category_2=category_levels[2] if len(category_levels) > 2 else None,
             category_3=category_levels[3] if len(category_levels) > 3 else None
         )
-
         self.products.append(product)
 
     def print_stats(self):

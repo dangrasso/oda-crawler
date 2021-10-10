@@ -4,12 +4,13 @@ import signal
 import sys
 from dataclasses import asdict, fields
 from datetime import datetime
+from typing import Iterable
 
-from oda.oda_crawler import OdaCrawler
-from oda.oda_product import Product
+from crawler.oda.oda_crawler import OdaCrawler
+from crawler.oda.oda_product import Product
 
 
-def save_state(frontier, visited, products):
+def save_state(frontier: Iterable[str], visited: Iterable[str], products: Iterable[Product]):
     now = datetime.now()
 
     with open(f"oda_frontier_{now:%Y%m%d-%H%M}.json", "w", encoding="UTF8") as file:
@@ -28,8 +29,7 @@ def save_state(frontier, visited, products):
 
 
 def main():
-    crawler = OdaCrawler("https://oda.com/no/products/", max_visits=10000)
-    # IDEA: allow loading status
+    crawler = OdaCrawler("https://oda.com/no/products/", max_visits=100)
 
     def on_interrupt(*args):
         print("\nInterrupted! Saving state before exiting...")

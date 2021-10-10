@@ -39,7 +39,7 @@ class Frontier(ABC):
 # Round 1: a simple deque
 class InMemoryDequeFrontier(Frontier):
     """
-    This class provides a Frontier implementation that keeps urls in memory and works like a deque
+    A Frontier implementation that keeps urls in memory and works like a deque
     """
 
     def __init__(self):
@@ -64,7 +64,7 @@ class InMemoryDequeFrontier(Frontier):
 # Round 2: using both deque and set to avoid duplicates (at the expense of memory)
 class InMemoryHybridFrontier(Frontier):
     """
-    This class provides a Frontier implementation that keeps urls in memory and works like a deque but also filters out duplicates
+    A Frontier implementation that keeps urls in memory and works like a deque but also filters out duplicates
     """
 
     def __init__(self):
@@ -96,7 +96,7 @@ class InMemoryHybridFrontier(Frontier):
 # Round 3: based on 2 sets to avoid duplicates (within same prio)
 class InMemorySetFrontier(Frontier):
     """
-    This class provides a Frontier implementation that keeps urls in memory and works like a set, avoiding duplicates.
+    A Frontier implementation that keeps urls in memory and works like a set, avoiding duplicates.
     There could still be duplicates between low and high prio.
     """
 

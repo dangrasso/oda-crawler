@@ -1,6 +1,6 @@
 import unittest
 
-from util import get_base_url, to_absolute_url
+from crawler.util import get_base_url, to_absolute_url
 
 
 class UtilTest(unittest.TestCase):
