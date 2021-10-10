@@ -51,13 +51,13 @@ class Crawler(ABC):
         sleep(round(random.uniform(0.5, 1.5), 1))
 
         if res.ok:
-            html = BeautifulSoup(res.content, "html.parser")  # IDEA: optimize by moving 'out' the html parsing
+            html = BeautifulSoup(res.content, "html.parser")
             return (html, res.status_code)
 
         print(f"Got {res.status_code} response for '{url}'")
 
         if retries > 0 and res.status_code == 429:  # <- Too Many Requests
-            sleep(res.headers.get('Retry-After', 60))
+            sleep(res.headers.get("Retry-After", 60))
             self.fetch_content(url, retries - 1)
 
         return (None, res.status_code)

@@ -12,19 +12,19 @@ from oda.oda_product import Product
 def save_state(frontier, visited, products):
     now = datetime.now()
 
-    with open(f'oda_frontier_{now:%Y%m%d-%H%M}.json', 'w', encoding='UTF8') as file:
+    with open(f"oda_frontier_{now:%Y%m%d-%H%M}.json", "w", encoding="UTF8") as file:
         file.write(json.dumps(list(frontier), indent=2))
-        print(f'Saved frontier: {file.name}')
+        print(f"Saved frontier: {file.name}")
 
-    with open(f'oda_visited_{now:%Y%m%d-%H%M}.json', 'w', encoding='UTF8') as file:
+    with open(f"oda_visited_{now:%Y%m%d-%H%M}.json", "w", encoding="UTF8") as file:
         file.write(json.dumps(list(visited), indent=2))
-        print(f'Saved visited: {file.name}')
+        print(f"Saved visited: {file.name}")
 
-    with open(f'oda_products_{now:%Y%m%d-%H%M}.csv', 'w', encoding='UTF8') as file:
+    with open(f"oda_products_{now:%Y%m%d-%H%M}.csv", "w", encoding="UTF8") as file:
         writer = csv.DictWriter(file, fieldnames=[field.name for field in fields(Product)])
         writer.writeheader()
         writer.writerows([asdict(product) for product in products])
-        print(f'Saved collected: {file.name}')
+        print(f"Saved collected: {file.name}")
 
 
 def main():
@@ -32,7 +32,7 @@ def main():
     # IDEA: allow loading status
 
     def on_interrupt(*args):
-        print('\nInterrupted! Saving state before exiting...')
+        print("\nInterrupted! Saving state before exiting...")
         save_state(frontier=crawler.frontier, visited=crawler.visited, products=crawler.products)
         sys.exit(0)
 
