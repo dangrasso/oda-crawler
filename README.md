@@ -25,6 +25,12 @@ This project has 2 dependencies:
 python main.py
 ```
 
+## How to Test
+
+```
+python -m unittest discover tests
+```
+
 ## Choices
 
 ### Language
@@ -38,6 +44,7 @@ In a real project I would also use a crawling/scraping framework, but that would
 
 ### Output
 I chose CSV as a simple, versatile format that can be imported directly in several visualization tools, making it suitable for non-technical users as well.
+
 
 ## Approach
 
@@ -86,7 +93,7 @@ This tool performs static parsing (no js is executed). This trades flexibility f
 In order to parse online stores with client heavy front-ends, we may want to add a custom Parser implementation using something like Selenium or Puppeteer to reproduce a full browser environment.
 
 ### Testing
-There are no automated tests, but the code should be easily testable. 
+There are only a few automated tests, but the code should be easily testable. 
 One example is the ability to inject the state in the Crawler class. Another is the isolation of the page fetching logic in a function that could be mocked.
 
 ### Politeness
