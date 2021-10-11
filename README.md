@@ -35,6 +35,21 @@ Before stopping, the program will save the current state in 3 files:
 - `oda_visited_<DATETIME>.json`, for debugging
 - `oda_products_<DATETIME>.csv` <-- this is the main application output
 
+## Results
+
+This is the outcome of a full run
+
+#### Burndown chart
+Here we get a glimpse of how the crawler discovered and visited all urls.
+
+![frontier_burndown](https://user-images.githubusercontent.com/5155314/136757236-472f820d-71ba-4703-a7a2-f2f9aac56587.png)
+
+This shows:
+- an initial discovery phase
+- a peak around 1500 visits (with the frontier topping at ~2800 urls)
+- almost-linear smooth slope going through all the products in the frontier
+- a final "bumpy" ride when reaching the bottom part of the frontier, discovering the remaining products
+
 
 ## Main Choices
 
@@ -147,6 +162,7 @@ On top of that we could tune the request rate based on the avg response latency,
 
 
 ## Other Ideas
+
 
 ### Configurability
 A configuration could be stored in a (e.g. json) file and loaded on startup. This could include:
