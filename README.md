@@ -53,6 +53,8 @@ This shows:
 
 ### Visualizations
 
+Using the crawler output I created some visualizations on https://rawgraphs.io/
+
 All products grouped by categories (and subcategories):
 ![mosaic_by_category_nested](visualizations/mosaic_categories_with_legend_900x600.png)
 
