@@ -54,9 +54,9 @@ This shows:
 ### Visualizations
 
 All products grouped by categories (and subcategories):
-![visualizations/mosaic_categories_with_legend_900x600.png]
+![mosaic_by_category_nested](visualizations/mosaic_categories_with_legend_900x600.png)
 
 All products grouped by category, sized by price:
-![visualizations/price_categories_mosaic_legend_1000x600.png]
+![mosaic_price_by_top_category](visualizations/price_categories_mosaic_legend_1000x600.png)
 
 Guess which category is the red one where half the products are cheap while the other half expensive.
